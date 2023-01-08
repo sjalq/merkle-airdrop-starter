@@ -5,7 +5,6 @@ pragma solidity >=0.8.0;
 
 import { IERC20 } from "@openzeppelin/token/ERC20/IERC20.sol"; // OZ: IERC20
 import { MerkleProof } from "@openzeppelin/utils/cryptography/MerkleProof.sol"; // OZ: MerkleProof
-import { ERC20 } from "@solmate/tokens/ERC20.sol"; // Solmate: ERC20
 
 /// @title MerkleClaim
 /// @notice Tokens claimable by members of a merkle tree
@@ -14,7 +13,7 @@ contract MerkleClaim {
 
   /// ============ Immutable storage ============
 
-  /// @notice claimee inclusion root
+  /// @notice claimant inclusion root
   bytes32 public immutable merkleRoot;
 
   /// @notice ERC20 token
@@ -40,7 +39,7 @@ contract MerkleClaim {
   /// @notice Creates a new MerkleClaimERC20 contract
   /// @param _token of token to be claimed
   /// @param _fundingSource of account containing disbursement funds
-  /// @param _merkleRoot of claimees
+  /// @param _merkleRoot of claimants
   constructor(
     address _token,
     address _fundingSource,
@@ -61,8 +60,8 @@ contract MerkleClaim {
   /// ============ Functions ============
 
   /// @notice Allows claiming tokens if address is part of merkle tree
-  /// @param to address of claimee
-  /// @param amount of tokens owed to claimee
+  /// @param to address of claimant
+  /// @param amount of tokens owed to claimant
   /// @param proof merkle proof to prove address and amount are in tree
   function claim(address to, uint256 amount, bytes32[] calldata proof) external {
     // Throw if address has already claimed tokens
@@ -84,16 +83,10 @@ contract MerkleClaim {
   }
 }
 
-contract RewardToken is ERC20
-{
-  constructor() ERC20("Reward Token", "RTK", 18) 
-  {
-    _mint(msg.sender, (10**6)*(10**18));
-  }
-}
-
 contract MerkleRootFactory
 {
+  event ContractDeployed(address _merkleClaimAddress);
+
   constructor() {}
 
   function deployMerkleDrop(
@@ -102,23 +95,8 @@ contract MerkleRootFactory
       bytes32 _merkleRoot) 
     external returns (address)
   {
-    return address(new MerkleClaim(_rewardToken, _fundingSource, _merkleRoot));
-  }
-}
-
-contract DemoMerkleClaim
-{
-  // make an erc20 contract, minting some to this contract
-  // deploy the merkle drop contract
-  // approve the merkle drop contract to spend the tokens
-
-  ERC20 public rewardToken;
-  MerkleClaim public merkleClaim;
-
-  constructor(bytes32 _merkleRoot)
-  {
-    rewardToken = new RewardToken();
-    merkleClaim = new MerkleClaim(address(rewardToken), address(this), _merkleRoot);
-    rewardToken.approve(address(merkleClaim), (10**6)*(10**18));
+    MerkleClaim merkleClaim = new MerkleClaim(_rewardToken, _fundingSource, _merkleRoot);
+    emit ContractDeployed(address(merkleClaim));
+    return address(merkleClaim);
   }
 }
