@@ -6,7 +6,7 @@ import { ERC20 } from "@solmate/tokens/ERC20.sol"; // Solmate: ERC20
 
 contract RewardToken is ERC20
 {
-  constructor() ERC20("Reward Token", "RTK", 18) 
+  constructor() ERC20("Circle USD", "USDC", 18) 
   {
     _mint(msg.sender, (10**6)*(10**18));
   }
