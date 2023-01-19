@@ -83,7 +83,7 @@ contract MerkleClaim {
   }
 }
 
-contract MerkleRootFactory
+contract MerkleClaimFactory
 {
   event ContractDeployed(address _merkleClaimAddress);
 
